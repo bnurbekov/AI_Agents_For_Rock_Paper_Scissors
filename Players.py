@@ -1,4 +1,14 @@
 #!/usr/bin/python
+#AI for RPSLW game.  Methods implimented include:
+
+#constant Spock: always throws spock
+#random: picks a purely random throw
+#weighted random: weights each choice based on previous history, but still random
+#average (MLE/MAP): checks the average move of the player, and beats it
+#Bayes Average: combines the average move that beats a player, and uses it
+#N rotation: determines the average rotation of the player, and counters it
+#pattern detection: looks in the history for the longest string of the pattern detected, and attempts to beat the next move
+#Bayes pattern detection: waits multiple patterns found and computes the best move
 
 import random
 from collections import defaultdict
