@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, Players
+import sys
 from Players import Moves
 from Players import PlayerFactory
 
@@ -46,7 +46,16 @@ if __name__ == "__main__":
             else:
                 print "You tie!"
 
-            history.append(move)
+            history.append((move, result))
             numGames += 1
 
-    print history
+    scoreSum = sum(outcome[1] for outcome in history)
+
+    print "========================================"
+
+    if scoreSum >= 1:
+        print "Overall uou win!"
+    elif scoreSum <= -1:
+        print "Overall you lose!"
+    else:
+        print "Overall you tie!"

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import random
+from collections import defaultdict
 
 class Moves:
     SCISSORS = "Scissors"
@@ -78,7 +79,6 @@ class Moves:
     def getRandomMove():
         return random.choice(Moves.getAllMoves())
 
-
     @staticmethod
     def getMovesThatCounter(move):
         counterMoves = []
@@ -121,6 +121,26 @@ class Player:
     def getPlayerName(self):
         return "General Player"
 
+    def getLeastUsedMoves(self, history):
+        moveCountDict = dict()
+
+        for move in Moves.getAllMoves():
+            moveCountDict[move] = 0
+
+        for move in history:
+            moveCountDict[move] += 1
+
+        leastUsedMoves = []
+        smallestCount = 1000000
+        for key, value in moveCountDict.iteritems():
+            if smallestCount > value:
+                smallestCount = value
+                leastUsedMoves.append(key)
+            elif smallestCount == value:
+                leastUsedMoves.append(key)
+
+        return  leastUsedMoves
+
     def getNextMove(self, history):
         return "Rock"
 
@@ -136,7 +156,15 @@ class Player1(Player):
         return "Least used move beating Player"
 
     def getNextMove(self, history):
-        return
+        moveHistory = [outcome[0] for outcome in history]
+
+        if len(history) <= 0:
+            return Moves.getRandomMove()
+
+        leastUsedMove = random.choice(self.getLeastUsedMoves(moveHistory))
+        moveBeatingLeastUsedMove = random.choice(Moves.getMovesThatCounter(leastUsedMove))
+
+        return moveBeatingLeastUsedMove
 
 class Player2(Player):
     def getPlayerName(self):
