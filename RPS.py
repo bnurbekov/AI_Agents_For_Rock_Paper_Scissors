@@ -54,7 +54,7 @@ if __name__ == "__main__":
     print "========================================"
 
     if scoreSum >= 1:
-        print "Overall uou win!"
+        print "Overall you win!"
     elif scoreSum <= -1:
         print "Overall you lose!"
     else:
