@@ -130,7 +130,8 @@ class PlayerFactory:
 class Player:
     def getPlayerName(self):
         return "General Player"
-
+        
+#not used in all players, consider moving
     def getLeastUsedMoves(self, history):
         moveCountDict = dict()
 
