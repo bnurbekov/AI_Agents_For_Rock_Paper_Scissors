@@ -3,7 +3,6 @@
 import sys, Players
 from Players import Moves
 from Players import PlayerFactory
-from Players import Player
 
 def checkArgs():
     validArgNum = len(sys.argv) == 3
@@ -37,9 +36,16 @@ if __name__ == "__main__":
         except:
             print "Sorry, I didn't quite catch that. Please enter Rock | Paper | Scissors | Lizard | Spock."
         else:
-            print move
             print "You tried " + move + " and I tried " + AIMove
-            Moves.result(move, AIMove)
+            result = Moves.compare(move, AIMove)
+
+            if result is 1:
+                print "You win!"
+            elif result is -1:
+                print "You lose!"
+            else:
+                print "You tie!"
+
             history.append(move)
             numGames += 1
 

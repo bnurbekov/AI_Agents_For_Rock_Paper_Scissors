@@ -31,42 +31,48 @@ class Moves:
         raise Exception("Unrecognized move string was provided.")
 
     @staticmethod
-    def result(human, computer):
-        if human == Moves.ROCK:
-            if computer == "Lizard" or computer == "Scissors":
-                print "You win!"
-            elif computer == "Paper" or computer == "Spock":
-                print "You lose!"
+    def compare(move1, move2):
+        """
+        Returns 1 if move1 beats move2
+        Returns 0 if move1 is equal to move2 (tie)
+        Returns -1 if move2 beats move1
+        """
+
+        if move1 == Moves.ROCK:
+            if move2 == Moves.LIZARD or move2 == Moves.SCISSORS:
+                return 1
+            elif move2 == Moves.PAPER or move2 == Moves.SPOCK:
+                return -1
             else:
-                print "You tie!"
-        if human == Moves.PAPER:
-            if computer == "Rock" or computer == "Spock":
-                print "You win!"
-            elif computer == "Scissors" or computer == "Lizard":
-                print "You lose!"
+                return 0
+        elif move1 == Moves.PAPER:
+            if move2 == Moves.ROCK or move2 == Moves.SPOCK:
+                return 1
+            elif move2 == Moves.SCISSORS or move2 == Moves.LIZARD:
+                return -1
             else:
-                print "You tie!"
-        if human == Moves.SCISSORS:
-            if computer == "Paper" or computer == "Lizard":
-                print "You win!"
-            elif computer == "Rock" or computer == "Spock":
-                print "You lose!"
+                return 0
+        elif move1 == Moves.SCISSORS:
+            if move2 == Moves.PAPER or move2 == Moves.LIZARD:
+                return 1
+            elif move2 == Moves.ROCK or move2 == Moves.SPOCK:
+                return -1
             else:
-                print "You tie!"
-        if human == Moves.LIZARD:
-            if computer == "Spock" or computer == "Paper":
-                print "You win!"
-            elif computer == "Scissors" or computer == "Rock":
-                print "You lose!"
+                return 0
+        elif move1 == Moves.LIZARD:
+            if move2 == Moves.SPOCK or move2 == Moves.PAPER:
+                return 1
+            elif move2 == Moves.SCISSORS or move2 == Moves.ROCK:
+                return -1
             else:
-                print "You tie!"
-        if human == Moves.SPOCK:
-            if computer == "Rock" or computer == "Scissors":
-                print "You win!"
-            elif computer == "Paper" or computer == "Lizard":
-                print "You lose!"
+                return 0
+        else: #Moves.SPOCK
+            if move2 == Moves.ROCK or move2 == Moves.SCISSORS:
+                return 1
+            elif move2 == Moves.PAPER or move2 == Moves.LIZARD:
+                return -1
             else:
-                print "You tie!"
+                return 0
 
     @staticmethod
     def getRandomMove():
@@ -75,8 +81,25 @@ class Moves:
 
     @staticmethod
     def getMovesThatCounter(move):
-        return
+        counterMoves = []
 
+        if move == Moves.ROCK:
+            counterMoves.append(Moves.PAPER)
+            counterMoves.append(Moves.SPOCK)
+        elif move == Moves.PAPER:
+            counterMoves.append(Moves.SCISSORS)
+            counterMoves.append(Moves.LIZARD)
+        elif move == Moves.SCISSORS:
+            counterMoves.append(Moves.ROCK)
+            counterMoves.append(Moves.SPOCK)
+        elif move == Moves.LIZARD:
+            counterMoves.append(Moves.SCISSORS)
+            counterMoves.append(Moves.ROCK)
+        else:
+            counterMoves.append(Moves.PAPER)
+            counterMoves.append(Moves.LIZARD)
+
+        return counterMoves
 
 class PlayerFactory:
     @staticmethod
@@ -109,17 +132,29 @@ class Player0(Player):
         return Moves.getRandomMove()
 
 class Player1(Player):
+    def getPlayerName(self):
+        return "Least used move beating Player"
+
     def getNextMove(self, history):
         return
 
 class Player2(Player):
+    def getPlayerName(self):
+        return "Pattern matching Player"
+
     def getNextMove(self, history):
         return
 
 class Player3(Player):
+    def getPlayerName(self):
+        return "Advanced versatile Player"
+
     def getNextMove(self, history):
         return
 
 class Player4(Player):
+    def getPlayerName(self):
+        return "Advanced group matching Player"
+
     def getNextMove(self, history):
         return
