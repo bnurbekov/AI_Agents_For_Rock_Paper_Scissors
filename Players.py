@@ -15,11 +15,11 @@ import random
 from collections import defaultdict
 
 class Moves:
-    SCISSORS = "Scissors"
-    ROCK = "Rock"
-    PAPER = "Paper"
-    LIZARD = "Lizard"
-    SPOCK = "Spock"
+    SCISSORS = "S"
+    ROCK = "R"
+    PAPER = "P"
+    LIZARD = "L"
+    SPOCK = "W"
 
     @staticmethod
     def getAllMoves():
