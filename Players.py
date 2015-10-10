@@ -140,6 +140,18 @@ class Player:
     def getPlayerName(self):
         return "General Player"
         
+    # Picks a sample from the population with
+    def weighted_choice(self, moves):
+        total = sum(weight for move, weight in moves.iteritems())
+        r = random.uniform(0, total)
+        upto = 0
+
+        for move, weight in population.iteritems():
+            if upto + weight >= r:
+                return move
+
+            upto += weight
+    
 #not used in all players, consider moving
     def getLeastUsedMoves(self, history):
         moveCountDict = dict()
@@ -183,51 +195,53 @@ class Player2(Player):
         return "Weighted Random"
 
     def getNextMove(self, history):
-	rockScore    = 0
-	paperScore   = 0
-	scissorsScore = 0
-	lizardScore  = 0
-	spockScore   = 0
+    	moveDict = {}
+    	for move in Move.getAllMoves():
+    		moveDict[move] = 0
+    	
         for move_human_opponent_outcome in history:
 		move = move_human_opponent_outcome[0]
 		if move == Moves.ROCK:
-			rockScore+=.5
-			paperScore+=1
-			spockScore+=1
+			moveDict[Moves.ROCK]+=.5
+			moveDict[Moves.PAPER]+=1
+			moveDict[Moves.SPOCK]+=1
 		elif move == Moves.PAPER:
-			paperScore+=.5
-			scissorsScore+=1
-			lizardScore+=1
+			moveDict[Moves.PAPER]+=.5
+			moveDict[Moves.SCISSORS]+=1
+			moveDict[Moves.LIZARD]+=1
 		elif move == Moves.SCISSORS:
-			scissorsScore+=.5
-			rockScore+=1
-			spockScore+=1
+			moveDict[Moves.SCISSORS]+=.5
+			moveDict[Moves.ROCK]+=1
+			moveDict[Moves.SPOCK]+=1
 		elif move == Moves.LIZARD:
-			lizardScore+=.5
-			scissorsScore+=1
-			rockScore+=1
+			moveDict[Moves.LIZARD]+=.5
+			moveDict[Moves.SCISSORS]+=1
+			moveDict[Moves.ROCK]+=1
 		elif move == Moves.SPOCK:
-			spockScore+=.5
-			paperScore+=1
-			lizardScore+=1
-	nextMove = random.uniform(0,rockScore+paperScore+scissorsScore+lizardScore+spockScore)
-	if nextMove <= rockScore:
-		return Moves.ROCK
-	nextMove-=rockScore
-	if nextMove <= paperScore:
-		return Moves.PAPER
-	nextMove-=paperScore
-	if nextMove <= scissorsScore:
-		return Moves.SCISSORS
-	nextMove-=scissorsScore
-	if nextMove <= lizardScore:
-		return Moves.LIZARD
-	nextMove-=lizardScore
-	if nextMove <= spockScore:
-		return Moves.SPOCK
-	else:
-		print "ERROR"
-		return
+			moveDict[Moves.SPOCK]+=.5
+			moveDict[Moves.PAPER]+=1
+			moveDict[Moves.LIZARD]+=1
+	
+	return self.weighted_choice(moveDict)
+	
+	# nextMove = random.uniform(0,rockScore+paperScore+scissorsScore+lizardScore+spockScore)
+	# if nextMove <= rockScore:
+	# 	return Moves.ROCK
+	# nextMove-=rockScore
+	# if nextMove <= paperScore:
+	# 	return Moves.PAPER
+	# nextMove-=paperScore
+	# if nextMove <= scissorsScore:
+	# 	return Moves.SCISSORS
+	# nextMove-=scissorsScore
+	# if nextMove <= lizardScore:
+	# 	return Moves.LIZARD
+	# nextMove-=lizardScore
+	# if nextMove <= spockScore:
+	# 	return Moves.SPOCK
+	# else:
+	# 	print "ERROR"
+	# 	return
 
 class Player3(Player):
     def getPlayerName(self):
