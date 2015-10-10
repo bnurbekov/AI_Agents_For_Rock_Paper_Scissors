@@ -185,7 +185,7 @@ class Player2(Player):
     	for move in Move.getAllMoves():
     		moveDict[move] = 0
     	
-        for move_human_opponent_outcome in myHistory:
+        for move_human_opponent_outcome in theirHistory:
 		move = move_human_opponent_outcome[0]
 		if move == Moves.ROCK:
 			moveDict[Moves.ROCK]+=.5
@@ -222,30 +222,10 @@ class Player3(Player):
     		
         for move_human_opponent_outcome in theirHistory:
 		move = move_human_opponent_outcome[0]
-		if move == Moves.ROCK:
-			moveDict[Moves.ROCK]+=1
-		elif move == Moves.PAPER:
-			moveDict[Moves.PAPER]+=1
-		elif move == Moves.SCISSORS:
-			moveDict[Moves.SCISSORS]+=1
-		elif move == Moves.LIZARD:
-			moveDict[Moves.LIZARD]+=1
-		elif move == Moves.SPOCK:
-			moveDict[Moves.SPOCK]+=1
+		moveDict[move]+=1
 
 	maxScoreMove = max(moveDict.iteritems(), key=operator.itemgetter(1))[0]
 	return random.choice(Move.getMovesThatCounter(maxScoreMove))
-
-	# if rockScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
-	# 	return Moves.PAPER
-	# elif paperScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
-	# 	return Moves.SCISSORS
-	# elif scissorsScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
-	# 	return Moves.SPOCK
-	# elif lizardScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
-	# 	return Moves.ROCK
-	# elif spockScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
-	# 	return Moves.LIZARD
 
 class Player4(Player):
     def getPlayerName(self):
@@ -259,22 +239,13 @@ class Player4(Player):
     	
         for move_human_opponent_outcome in theirHistory:
 		move = move_human_opponent_outcome[0]
-		if move == Moves.ROCK:
-			rockScore+=1
-		elif move == Moves.PAPER:
-			paperScore+=1
-		elif move == Moves.SCISSORS:
-			scissorsScore+=1
-		elif move == Moves.LIZARD:
-			lizardScore+=1
-		elif move == Moves.SPOCK:
-			spockScore+=1
+		moveDict[move] += 1
 
-	rockUtility     = 0.1*rockScore-1*paperScore+1*scissorsScore+1*lizardScore-1*spockScore
-	paperUtility    = 1.0*rockScore+0.1*paperScore-1*scissorsScore-1*lizardScore+1*spockScore
-	scissorsUtility = -1*rockScore+1*paperScore+.1*scissorsScore+1*lizardScore-1*spockScore
-	lizardUtility   = -1*rockScore+1*paperScore-1*scissorsScore+.1*lizardScore+1*spockScore
-	spockUtility    = 1.0*rockScore-1*paperScore+1*scissorsScore-1*lizardScore+.1*spockScore
+	rockUtility     = 0.1*moveDict[Moves.ROCK]-1*moveDict[Moves.PAPER]+1*moveDict[Moves.SCISSORS]+1*lizardScore-1*spockScore
+	paperUtility    = 1.0*moveDict[Moves.ROCK]+0.1*moveDict[Moves.PAPER]-1*moveDict[Moves.SCISSORS]-1*lizardScore+1*spockScore
+	scissorsUtility = -1*moveDict[Moves.ROCK]+1*moveDict[Moves.PAPER]+.1*moveDict[Moves.SCISSORS]+1*lizardScore-1*spockScore
+	lizardUtility   = -1*moveDict[Moves.ROCK]+1*moveDict[Moves.PAPER]-1*moveDict[Moves.SCISSORS]+.1*lizardScore+1*spockScore
+	spockUtility    = 1.0*moveDict[Moves.ROCK]-1*moveDict[Moves.PAPER]+1*moveDict[Moves.SCISSORS]-1*lizardScore+.1*spockScore
 
 	if rockUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
 		return Moves.ROCK
