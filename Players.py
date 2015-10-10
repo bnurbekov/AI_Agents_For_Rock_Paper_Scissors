@@ -161,28 +161,28 @@ class Player:
 
         return  leastUsedMoves
 
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return "Rock"
 
 class Player0(Player):
     def getPlayerName(self):
-        return "Constant Player"
+        return "Constant"
         
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return Moves.SPOCK
 
 class Player1(Player):
     def getPlayerName(self):
-        return "Random Player"
+        return "Random"
 
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return Moves.getRandomMove()
 
 class Player2(Player):
     def getPlayerName(self):
         return "Weighted Random"
 
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         #moveHistory = [outcome[0] for outcome in history]
 
         #if len(history) <= 0:
@@ -198,40 +198,40 @@ class Player3(Player):
     def getPlayerName(self):
         return "MLE/MAP"
 
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return
 
 class Player4(Player):
     def getPlayerName(self):
         return "Bayes Average"
 
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return
 
 class Player5(Player):
     def getPlayerName(self):
         return "N Rotation w/l"
 
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return
     
 class Player6(Player):
     def getPlayerName(self):
         return "Pattern Detection"
 
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return
     
 class Player7(Player):
     def getPlayerName(self):
         return "Bayes Pattern Detection"
 
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return
     
 class Player8(Player):
     def getPlayerName(self):
         return "Best Category"
 
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return

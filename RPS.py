@@ -25,7 +25,7 @@ if __name__ == "__main__":
     player = PlayerFactory.initPlayer(int(sys.argv[1]))
     maxNumGames = int(sys.argv[2])
 
-    print "You selected player (" + player.getPlayerName() + ") and number of moves (%d)" % maxNumGames
+    print "You selected (" + player.getPlayerName() + ") player and number of moves (%d)" % maxNumGames
 
     player1History = ""
     player2History = ""
