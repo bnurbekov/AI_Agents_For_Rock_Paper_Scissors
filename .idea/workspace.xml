@@ -2,8 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c8dd9652-68c9-4e4b-af98-20c1e2f13efe" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Players.py" afterPath="$PROJECT_DIR$/Players.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/RPS.py" afterPath="$PROJECT_DIR$/RPS.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="AI_Final_Project.iws" />
@@ -312,7 +310,13 @@
       <option name="project" value="LOCAL" />
       <updated>1444503448590</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Optimizes the code.">
+      <created>1444504626892</created>
+      <option name="number" value="00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1444504626892</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -376,7 +380,8 @@
     <MESSAGE value="Puts all the logic related to moves into Move class." />
     <MESSAGE value="Refactoring move comparing logic." />
     <MESSAGE value="Fixes the errors." />
-    <option name="LAST_COMMIT_MESSAGE" value="Fixes the errors." />
+    <MESSAGE value="Optimizes the code." />
+    <option name="LAST_COMMIT_MESSAGE" value="Optimizes the code." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
