@@ -151,55 +151,34 @@ class Player:
                 return move
 
             upto += weight
-    
-#not used in all players, consider moving
-    def getLeastUsedMoves(self, history):
-        moveCountDict = dict()
 
-        for move in Moves.getAllMoves():
-            moveCountDict[move] = 0
-
-        for move in history:
-            moveCountDict[move] += 1
-
-        leastUsedMoves = []
-        smallestCount = 1000000
-        for key, value in moveCountDict.iteritems():
-            if smallestCount > value:
-                smallestCount = value
-                leastUsedMoves.append(key)
-            elif smallestCount == value:
-                leastUsedMoves.append(key)
-
-        return  leastUsedMoves
-
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return "Rock"
 
 class Player0(Player):
     def getPlayerName(self):
         return "Constant Player"
         
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return Moves.SPOCK
 
 class Player1(Player):
     def getPlayerName(self):
         return "Random Player"
 
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return Moves.getRandomMove()
 
 class Player2(Player):
     def getPlayerName(self):
         return "Weighted Random"
 
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
     	moveDict = {}
     	for move in Move.getAllMoves():
     		moveDict[move] = 0
     	
-        for move_human_opponent_outcome in history:
+        for move_human_opponent_outcome in myHistory:
 		move = move_human_opponent_outcome[0]
 		if move == Moves.ROCK:
 			moveDict[Moves.ROCK]+=.5
