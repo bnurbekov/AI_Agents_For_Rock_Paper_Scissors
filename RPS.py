@@ -38,7 +38,7 @@ if __name__ == "__main__":
         except:
             print "Sorry, I didn't quite catch that. Please enter Rock | Paper | Scissors | Lizard | Spock."
         else:
-            print "You tried " + move + " and I tried " + AIMove
+            print "You tried (" + Moves.convertToFullName(move) + ") and I tried (" + Moves.convertToFullName(AIMove) + ")"
             result = Moves.compare(move, AIMove)
 
             if result is 1:

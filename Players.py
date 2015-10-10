@@ -44,6 +44,19 @@ class Moves:
         raise Exception("Unrecognized move string was provided.")
 
     @staticmethod
+    def convertToFullName(move):
+        if move == Moves.PAPER:
+            return "Paper"
+        elif move == Moves.SCISSORS:
+            return "Scissors"
+        elif move == Moves.ROCK:
+            return "Rock"
+        elif move == Moves.SPOCK:
+            return "Spock"
+        else:
+            return "Lizard"
+
+    @staticmethod
     def compare(move1, move2):
         """
         Returns 1 if move1 beats move2
@@ -79,13 +92,16 @@ class Moves:
                 return -1
             else:
                 return 0
-        else: #Moves.SPOCK
+        elif move1 == Moves.SPOCK:
             if move2 == Moves.ROCK or move2 == Moves.SCISSORS:
                 return 1
             elif move2 == Moves.PAPER or move2 == Moves.LIZARD:
                 return -1
             else:
                 return 0
+
+        else:
+            raise Exception("Unknown move.")
 
     @staticmethod
     def getRandomMove():
@@ -140,18 +156,41 @@ class PlayerFactory:
 class Player:
     def getPlayerName(self):
         return "General Player"
-        
-    # Picks a sample from the population with
+
+    def calculateScoresForMoves(self, myHistory, scoreHistory, maximization):
+        moveDict = {}
+        for move in Moves.getAllMoves():
+            #initialize as one to scale the weights properly
+            moveDict[move] = 1
+
+        for i in range(len(scoreHistory)):
+            if scoreHistory[i] == maximization:
+                moveDict[myHistory[i]] += 1
+            elif scoreHistory[i] == 0:
+                moveDict[myHistory[i]] += 0.5
+            else:
+                #decrement the count if it is larger than 0 on lose
+                if moveDict[myHistory[i]] > 1:
+                    moveDict[myHistory[i]] -= 1
+
+        return moveDict
+
+    # Picks a move from moves considering weight
     def weighted_choice(self, moves):
         total = sum(weight for move, weight in moves.iteritems())
         r = random.uniform(0, total)
         upto = 0
 
-        for move, weight in moves.iteritems():
+        keyValuePairs = list(moves.iteritems())
+        random.shuffle(keyValuePairs)
+
+        for move, weight in keyValuePairs:
             if upto + weight >= r:
                 return move
 
             upto += weight
+
+        return None
 
     def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
         return "Rock"
@@ -175,16 +214,7 @@ class Player2(Player):
         return "Weighted Random"
 
     def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
-        moveDict = {}
-        for move in Moves.getAllMoves():
-            moveDict[move] = 0
-
-        for i in range(scoreHistory):
-            if scoreHistory[i] == maximization:
-                moveDict[myHistory[move]] += 1
-            elif scoreHistory[i] == 0:
-                moveDict[myHistory[move]] += 0.5
-
+        moveDict = self.calculateScoresForMoves(myHistory, scoreHistory, maximization)
         return self.weighted_choice(moveDict)
 
 class Player3(Player):
@@ -202,31 +232,24 @@ class Player4(Player):
         return "Bayes Average"
 
     def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
-        moveDict = {}
+        moveDict = self.calculateScoresForMoves(theirHistory, scoreHistory, -maximization)
+        moveUtilityDict = {}
 
         for move in Moves.getAllMoves():
-            moveDict[move] = 0
+            moveUtilityDict[move] = 0
 
-        for move_human_opponent_outcome in theirHistory:
-            move = move_human_opponent_outcome[0]
-            moveDict[move] += 1
+        for move in moveUtilityDict:
+            for m in moveDict:
+                if (move == m):
+                    moveUtilityDict[move] += 0.1*moveDict[m]
+                elif (move in Moves.getMovesThatCounter(m)):
+                    moveUtilityDict[move] -= moveDict[m]
+                else:
+                    moveUtilityDict[move] += moveDict[m]
 
-        rockUtility = 0.1*moveDict[Moves.ROCK]-1*moveDict[Moves.PAPER]+1*moveDict[Moves.SCISSORS]+1*moveDict[Moves.LIZARD]-1*moveDict[Moves.SPOCK]
-        paperUtility = 1.0*moveDict[Moves.ROCK]+0.1*moveDict[Moves.PAPER]-1*moveDict[Moves.SCISSORS]-1*moveDict[Moves.LIZARD]+1*moveDict[Moves.SPOCK]
-        scissorsUtility = -1*moveDict[Moves.ROCK]+1*moveDict[Moves.PAPER]+.1*moveDict[Moves.SCISSORS]+1*moveDict[Moves.LIZARD]-1*moveDict[Moves.SPOCK]
-        lizardUtility = -1*moveDict[Moves.ROCK]+1*moveDict[Moves.PAPER]-1*moveDict[Moves.SCISSORS]+.1*moveDict[Moves.LIZARD]+1*moveDict[Moves.SPOCK]
-        spockUtility = 1.0*moveDict[Moves.ROCK]-1*moveDict[Moves.PAPER]+1*moveDict[Moves.SCISSORS]-1*moveDict[Moves.LIZARD]+.1*moveDict[Moves.SPOCK]
+        opponentMove = max(moveUtilityDict.iteritems(), key=operator.itemgetter(1))[0]
 
-        if rockUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
-            return Moves.ROCK
-        elif paperUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
-            return Moves.PAPER
-        elif scissorsUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
-            return Moves.SCISSORS
-        elif lizardUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
-            return Moves.LIZARD
-        elif spockUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
-            return Moves.SPOCK
+        return random.choice(Moves.getMoveThatCounters(opponentMove))
 
 class Player5(Player):
     def getPlayerName(self):
