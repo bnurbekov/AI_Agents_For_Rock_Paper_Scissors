@@ -125,6 +125,14 @@ class PlayerFactory:
             return Player3()
         elif (playerNum == 4):
             return Player4()
+        elif (playerNum == 5):
+            return Player5()
+        elif (playerNum == 6):
+            return Player6()
+        elif (playerNum == 7):
+            return Player7()
+        elif (playerNum == 8):
+            return Player8()
         else:
             return None
 
