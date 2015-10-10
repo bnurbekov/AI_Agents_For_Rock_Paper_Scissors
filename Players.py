@@ -4,7 +4,7 @@
 #0: constant Spock: always throws spock
 #1: random: picks a purely random throw
 #2: weighted random: weights each choice based on previous history, but still random
-#3: average (MLE/MAP): checks the average move of the player, and beats it
+#3: average (MAP): checks the average move of the player, and beats it
 #4: Bayes Average: combines the average move that beats a player, and uses it
 #5: N rotation: determines the average rotation of the player, and counters it
 #6: pattern detection: looks in the history for the longest string of the pattern detected, and attempts to beat the next move
@@ -15,11 +15,11 @@ import random
 from collections import defaultdict
 
 class Moves:
-    SCISSORS = "S"
-    ROCK = "R"
-    PAPER = "P"
-    LIZARD = "L"
-    SPOCK = "W"
+    SCISSORS = "Scissors"
+    ROCK = "Rock"
+    PAPER = "Paper"
+    LIZARD = "Lizard"
+    SPOCK = "Spock"
 
     @staticmethod
     def getAllMoves():
@@ -161,77 +161,139 @@ class Player:
 
         return  leastUsedMoves
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    def getNextMove(self, history):
         return "Rock"
 
 class Player0(Player):
     def getPlayerName(self):
-        return "Constant"
+        return "Constant Player"
         
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    def getNextMove(self, history):
         return Moves.SPOCK
 
 class Player1(Player):
     def getPlayerName(self):
-        return "Random"
+        return "Random Player"
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    def getNextMove(self, history):
         return Moves.getRandomMove()
 
 class Player2(Player):
     def getPlayerName(self):
         return "Weighted Random"
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
-        #moveHistory = [outcome[0] for outcome in history]
-
-        #if len(history) <= 0:
-         #   return Moves.getRandomMove()
-
-        #leastUsedMove = random.choice(self.getLeastUsedMoves(moveHistory))
-       # moveBeatingLeastUsedMove = random.choice(Moves.getMovesThatCounter(leastUsedMove))
-
-        #return moveBeatingLeastUsedMove
-        return
+    def getNextMove(self, history):
+	rockScore    = 0
+	paperScore   = 0
+	scissorsScore = 0
+	lizardScore  = 0
+	spockScore   = 0
+        for move_human_opponent_outcome in history:
+		move = move_human_opponent_outcome[0]
+		if move == Moves.ROCK:
+			rockScore+=.5
+			paperScore+=1
+			spockScore+=1
+		elif move == Moves.PAPER:
+			paperScore+=.5
+			scissorsScore+=1
+			lizardScore+=1
+		elif move == Moves.SCISSORS:
+			scissorsScore+=.5
+			rockScore+=1
+			spockScore+=1
+		elif move == Moves.LIZARD:
+			lizardScore+=.5
+			scissorsScore+=1
+			rockScore+=1
+		elif move == Moves.SPOCK:
+			spockScore+=.5
+			paperScore+=1
+			lizardScore+=1
+	nextMove = random.uniform(0,rockScore+paperScore+scissorsScore+lizardScore+spockScore)
+	if nextMove <= rockScore:
+		return Moves.ROCK
+	nextMove-=rockScore
+	if nextMove <= paperScore:
+		return Moves.PAPER
+	nextMove-=paperScore
+	if nextMove <= scissorsScore:
+		return Moves.SCISSORS
+	nextMove-=scissorsScore
+	if nextMove <= lizardScore:
+		return Moves.LIZARD
+	nextMove-=lizardScore
+	if nextMove <= spockScore:
+		return Moves.SPOCK
+	else:
+		print "ERROR"
+		return
 
 class Player3(Player):
     def getPlayerName(self):
         return "MLE/MAP"
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
-        return
+    def getNextMove(self, history):
+        rockScore    = 0
+	paperScore   = 0
+	scissorsScore = 0
+	lizardScore  = 0
+	spockScore   = 0
+        for move_human_opponent_outcome in history:
+		move = move_human_opponent_outcome[0]
+		if move == Moves.ROCK:
+			rockScore+=1
+		elif move == Moves.PAPER:
+			paperScore+=1
+		elif move == Moves.SCISSORS:
+			scissorsScore+=1
+		elif move == Moves.LIZARD:
+			lizardScore+=1
+		elif move == Moves.SPOCK:
+			spockScore+=1
+
+	if rockScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
+		return Moves.PAPER
+	elif paperScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
+		return Moves.SCISSORS
+	elif scissorsScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
+		return Moves.SPOCK
+	elif lizardScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
+		return Moves.ROCK
+	elif spockScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
+		return Moves.LIZARD
 
 class Player4(Player):
     def getPlayerName(self):
         return "Bayes Average"
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    def getNextMove(self, history):
         return
 
 class Player5(Player):
     def getPlayerName(self):
         return "N Rotation w/l"
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    def getNextMove(self, history):
         return
     
 class Player6(Player):
     def getPlayerName(self):
         return "Pattern Detection"
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    def getNextMove(self, history):
         return
     
 class Player7(Player):
     def getPlayerName(self):
         return "Bayes Pattern Detection"
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    def getNextMove(self, history):
         return
     
 class Player8(Player):
     def getPlayerName(self):
         return "Best Category"
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    def getNextMove(self, history):
         return
