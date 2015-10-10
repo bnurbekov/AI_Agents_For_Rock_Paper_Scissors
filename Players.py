@@ -11,14 +11,22 @@
 #7: Bayes pattern detection: weights multiple patterns found and computes the best move
 #8: category player: determines what category of person you are, and uses algorithms 1-7 to beat you
 
-import random, operator
+import random, operator, itertools
 
 class Moves:
-    SCISSORS = "Scissors"
-    ROCK = "Rock"
-    PAPER = "Paper"
-    LIZARD = "Lizard"
-    SPOCK = "Spock"
+    CISSORS = "S"
+    ROCK = "R"
+    PAPER = "P"
+    LIZARD = "L"
+    SPOCK = "W"
+
+    possibleMoves = ['R', 'P', 'S', 'L', 'S']
+
+    combinations = [''.join(i) for i in itertools.product(possibleMoves, repeat = 3)]
+
+    combine = {combinations[i] : str(i) for i in range(0, len(combinations))}
+
+    split = {str(i) : combinations[i] for i in range(0, len(combinations))}
 
     @staticmethod
     def getAllMoves():
