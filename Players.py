@@ -8,7 +8,7 @@
 #4: Bayes Average: combines the average move that beats a player, and uses it
 #5: N rotation: determines the average rotation of the player, and counters it
 #6: pattern detection: looks in the history for the longest string of the pattern detected, and attempts to beat the next move
-#7: Bayes pattern detection: waits multiple patterns found and computes the best move
+#7: Bayes pattern detection: weights multiple patterns found and computes the best move
 #8: category player: determines what category of person you are, and uses algorithms 1-7 to beat you
 
 import random
