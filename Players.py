@@ -153,110 +153,86 @@ class Player:
 
             upto += weight
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
         return "Rock"
 
 class Player0(Player):
     def getPlayerName(self):
         return "Constant Player"
         
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
         return Moves.SPOCK
 
 class Player1(Player):
     def getPlayerName(self):
         return "Random Player"
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
         return Moves.getRandomMove()
 
 class Player2(Player):
     def getPlayerName(self):
         return "Weighted Random"
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
-    	moveDict = {}
-    	for move in Moves.getAllMoves():
-    		moveDict[move] = 0
-    	
-        for move_human_opponent_outcome in theirHistory:
-		move = move_human_opponent_outcome[0]
-		if move == Moves.ROCK:
-			moveDict[Moves.ROCK]+=.5
-			moveDict[Moves.PAPER]+=1
-			moveDict[Moves.SPOCK]+=1
-		elif move == Moves.PAPER:
-			moveDict[Moves.PAPER]+=.5
-			moveDict[Moves.SCISSORS]+=1
-			moveDict[Moves.LIZARD]+=1
-		elif move == Moves.SCISSORS:
-			moveDict[Moves.SCISSORS]+=.5
-			moveDict[Moves.ROCK]+=1
-			moveDict[Moves.SPOCK]+=1
-		elif move == Moves.LIZARD:
-			moveDict[Moves.LIZARD]+=.5
-			moveDict[Moves.SCISSORS]+=1
-			moveDict[Moves.ROCK]+=1
-		elif move == Moves.SPOCK:
-			moveDict[Moves.SPOCK]+=.5
-			moveDict[Moves.PAPER]+=1
-			moveDict[Moves.LIZARD]+=1
-	
-	return self.weighted_choice(moveDict)
+    def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
+        moveDict = {}
+        for move in Moves.getAllMoves():
+            moveDict[move] = 0
+
+        for i in range(scoreHistory):
+            if scoreHistory[i] == maximization:
+                moveDict[myHistory[move]] += 1
+            elif scoreHistory[i] == 0:
+                moveDict[myHistory[move]] += 0.5
+
+        return self.weighted_choice(moveDict)
 
 class Player3(Player):
+    def __init__(self):
+        self.opponentPlayer = Player1()
+
     def getPlayerName(self):
         return "MLE/MAP"
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
-    	moveDict = {}
-    	
-        for move in Moves.getAllMoves():
-    		moveDict[move] = 0
-    		
-        for move_human_opponent_outcome in theirHistory:
-		move = move_human_opponent_outcome[0]
-		moveDict[move]+=1
-
-	maxScoreMove = max(moveDict.iteritems(), key=operator.itemgetter(1))[0]
-	return random.choice(Moves.getMovesThatCounter(maxScoreMove))
+    def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
+        return random.choice(Moves.getMovesThatCounter(self.opponentPlayer.getNextMove(theirHistory, myHistory, scoreHistory, -maximization)))
 
 class Player4(Player):
     def getPlayerName(self):
         return "Bayes Average"
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
         moveDict = {}
-    	
+
         for move in Moves.getAllMoves():
-    		moveDict[move] = 0
-    	
+            moveDict[move] = 0
+
         for move_human_opponent_outcome in theirHistory:
-		move = move_human_opponent_outcome[0]
-		moveDict[move] += 1
+            move = move_human_opponent_outcome[0]
+            moveDict[move] += 1
 
-	rockUtility     = 0.1*moveDict[Moves.ROCK]-1*moveDict[Moves.PAPER]+1*moveDict[Moves.SCISSORS]+1*moveDict[Moves.LIZARD]-1*moveDict[Moves.SPOCK]
-	paperUtility    = 1.0*moveDict[Moves.ROCK]+0.1*moveDict[Moves.PAPER]-1*moveDict[Moves.SCISSORS]-1*moveDict[Moves.LIZARD]+1*moveDict[Moves.SPOCK]
-	scissorsUtility = -1*moveDict[Moves.ROCK]+1*moveDict[Moves.PAPER]+.1*moveDict[Moves.SCISSORS]+1*moveDict[Moves.LIZARD]-1*moveDict[Moves.SPOCK]
-	lizardUtility   = -1*moveDict[Moves.ROCK]+1*moveDict[Moves.PAPER]-1*moveDict[Moves.SCISSORS]+.1*moveDict[Moves.LIZARD]+1*moveDict[Moves.SPOCK]
-	spockUtility    = 1.0*moveDict[Moves.ROCK]-1*moveDict[Moves.PAPER]+1*moveDict[Moves.SCISSORS]-1*moveDict[Moves.LIZARD]+.1*moveDict[Moves.SPOCK]
+        rockUtility = 0.1*moveDict[Moves.ROCK]-1*moveDict[Moves.PAPER]+1*moveDict[Moves.SCISSORS]+1*moveDict[Moves.LIZARD]-1*moveDict[Moves.SPOCK]
+        paperUtility = 1.0*moveDict[Moves.ROCK]+0.1*moveDict[Moves.PAPER]-1*moveDict[Moves.SCISSORS]-1*moveDict[Moves.LIZARD]+1*moveDict[Moves.SPOCK]
+        scissorsUtility = -1*moveDict[Moves.ROCK]+1*moveDict[Moves.PAPER]+.1*moveDict[Moves.SCISSORS]+1*moveDict[Moves.LIZARD]-1*moveDict[Moves.SPOCK]
+        lizardUtility = -1*moveDict[Moves.ROCK]+1*moveDict[Moves.PAPER]-1*moveDict[Moves.SCISSORS]+.1*moveDict[Moves.LIZARD]+1*moveDict[Moves.SPOCK]
+        spockUtility = 1.0*moveDict[Moves.ROCK]-1*moveDict[Moves.PAPER]+1*moveDict[Moves.SCISSORS]-1*moveDict[Moves.LIZARD]+.1*moveDict[Moves.SPOCK]
 
-	if rockUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
-		return Moves.ROCK
-	elif paperUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
-		return Moves.PAPER
-	elif scissorsUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
-		return Moves.SCISSORS
-	elif lizardUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
-		return Moves.LIZARD
-	elif spockUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
-		return Moves.SPOCK
+        if rockUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
+            return Moves.ROCK
+        elif paperUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
+            return Moves.PAPER
+        elif scissorsUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
+            return Moves.SCISSORS
+        elif lizardUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
+            return Moves.LIZARD
+        elif spockUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
+            return Moves.SPOCK
 
 class Player5(Player):
     def getPlayerName(self):
         return "N Rotation w/l"
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
         return
     
 class Player6(Player):
@@ -278,7 +254,7 @@ class Player6(Player):
 
         return dna
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
         dna = self.convertHistoriesIntoDna(myHistory, theirHistory)
 
         if dna == "":
@@ -307,12 +283,12 @@ class Player7(Player6):
     def getPlayerName(self):
         return "Bayes Pattern Detection"
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
         return
     
 class Player8(Player):
     def getPlayerName(self):
         return "Best Category"
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
         return
