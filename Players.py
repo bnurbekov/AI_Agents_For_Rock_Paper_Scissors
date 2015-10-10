@@ -158,43 +158,72 @@ class Player:
 
 class Player0(Player):
     def getPlayerName(self):
+        return "Constant Player"
+        
+    def getNextMove(self, history):
+        return Moves.SPOCK
+
+class Player1(Player):
+    def getPlayerName(self):
         return "Random Player"
 
     def getNextMove(self, history):
         return Moves.getRandomMove()
 
-class Player1(Player):
-    def getPlayerName(self):
-        return "Least used move beating Player"
-
-    def getNextMove(self, history):
-        moveHistory = [outcome[0] for outcome in history]
-
-        if len(history) <= 0:
-            return Moves.getRandomMove()
-
-        leastUsedMove = random.choice(self.getLeastUsedMoves(moveHistory))
-        moveBeatingLeastUsedMove = random.choice(Moves.getMovesThatCounter(leastUsedMove))
-
-        return moveBeatingLeastUsedMove
-
 class Player2(Player):
     def getPlayerName(self):
-        return "Pattern matching Player"
+        return "Weighted Random"
 
     def getNextMove(self, history):
+        #moveHistory = [outcome[0] for outcome in history]
+
+        #if len(history) <= 0:
+         #   return Moves.getRandomMove()
+
+        #leastUsedMove = random.choice(self.getLeastUsedMoves(moveHistory))
+       # moveBeatingLeastUsedMove = random.choice(Moves.getMovesThatCounter(leastUsedMove))
+
+        #return moveBeatingLeastUsedMove
         return
 
 class Player3(Player):
     def getPlayerName(self):
-        return "Advanced versatile Player"
+        return "MLE/MAP"
 
     def getNextMove(self, history):
         return
 
 class Player4(Player):
     def getPlayerName(self):
-        return "Advanced group matching Player"
+        return "Bayes Average"
+
+    def getNextMove(self, history):
+        return
+
+class Player5(Player):
+    def getPlayerName(self):
+        return "N Rotation w/l"
+
+    def getNextMove(self, history):
+        return
+    
+class Player6(Player):
+    def getPlayerName(self):
+        return "Pattern Detection"
+
+    def getNextMove(self, history):
+        return
+    
+class Player7(Player):
+    def getPlayerName(self):
+        return "Bayes Pattern Detection"
+
+    def getNextMove(self, history):
+        return
+    
+class Player8(Player):
+    def getPlayerName(self):
+        return "Best Category"
 
     def getNextMove(self, history):
         return
