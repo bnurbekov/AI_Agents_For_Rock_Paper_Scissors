@@ -14,19 +14,13 @@
 import random, operator, itertools
 
 class Moves:
-    CISSORS = "S"
+    SCISSORS = "S"
     ROCK = "R"
     PAPER = "P"
     LIZARD = "L"
     SPOCK = "W"
 
-    possibleMoves = ['R', 'P', 'S', 'L', 'S']
-
-    combinations = [''.join(i) for i in itertools.product(possibleMoves, repeat = 3)]
-
-    combine = {combinations[i] : str(i) for i in range(0, len(combinations))}
-
-    split = {str(i) : combinations[i] for i in range(0, len(combinations))}
+    combinations = [''.join(i) for i in itertools.product(['R', 'P', 'S', 'L', 'S'], repeat = 3)]
 
     @staticmethod
     def getAllMoves():
@@ -153,7 +147,7 @@ class Player:
         r = random.uniform(0, total)
         upto = 0
 
-        for move, weight in population.iteritems():
+        for move, weight in moves.iteritems():
             if upto + weight >= r:
                 return move
 
@@ -182,7 +176,7 @@ class Player2(Player):
 
     def getNextMove(self, myHistory, theirHistory, scoreHistory):
     	moveDict = {}
-    	for move in Move.getAllMoves():
+    	for move in Moves.getAllMoves():
     		moveDict[move] = 0
     	
         for move_human_opponent_outcome in theirHistory:
@@ -217,7 +211,7 @@ class Player3(Player):
     def getNextMove(self, myHistory, theirHistory, scoreHistory):
     	moveDict = {}
     	
-        for move in Move.getAllMoves():
+        for move in Moves.getAllMoves():
     		moveDict[move] = 0
     		
         for move_human_opponent_outcome in theirHistory:
@@ -225,7 +219,7 @@ class Player3(Player):
 		moveDict[move]+=1
 
 	maxScoreMove = max(moveDict.iteritems(), key=operator.itemgetter(1))[0]
-	return random.choice(Move.getMovesThatCounter(maxScoreMove))
+	return random.choice(Moves.getMovesThatCounter(maxScoreMove))
 
 class Player4(Player):
     def getPlayerName(self):
@@ -234,18 +228,18 @@ class Player4(Player):
     def getNextMove(self, myHistory, theirHistory, scoreHistory):
         moveDict = {}
     	
-        for move in Move.getAllMoves():
+        for move in Moves.getAllMoves():
     		moveDict[move] = 0
     	
         for move_human_opponent_outcome in theirHistory:
 		move = move_human_opponent_outcome[0]
 		moveDict[move] += 1
 
-	rockUtility     = 0.1*moveDict[Moves.ROCK]-1*moveDict[Moves.PAPER]+1*moveDict[Moves.SCISSORS]+1*lizardScore-1*spockScore
-	paperUtility    = 1.0*moveDict[Moves.ROCK]+0.1*moveDict[Moves.PAPER]-1*moveDict[Moves.SCISSORS]-1*lizardScore+1*spockScore
-	scissorsUtility = -1*moveDict[Moves.ROCK]+1*moveDict[Moves.PAPER]+.1*moveDict[Moves.SCISSORS]+1*lizardScore-1*spockScore
-	lizardUtility   = -1*moveDict[Moves.ROCK]+1*moveDict[Moves.PAPER]-1*moveDict[Moves.SCISSORS]+.1*lizardScore+1*spockScore
-	spockUtility    = 1.0*moveDict[Moves.ROCK]-1*moveDict[Moves.PAPER]+1*moveDict[Moves.SCISSORS]-1*lizardScore+.1*spockScore
+	rockUtility     = 0.1*moveDict[Moves.ROCK]-1*moveDict[Moves.PAPER]+1*moveDict[Moves.SCISSORS]+1*moveDict[Moves.LIZARD]-1*moveDict[Moves.SPOCK]
+	paperUtility    = 1.0*moveDict[Moves.ROCK]+0.1*moveDict[Moves.PAPER]-1*moveDict[Moves.SCISSORS]-1*moveDict[Moves.LIZARD]+1*moveDict[Moves.SPOCK]
+	scissorsUtility = -1*moveDict[Moves.ROCK]+1*moveDict[Moves.PAPER]+.1*moveDict[Moves.SCISSORS]+1*moveDict[Moves.LIZARD]-1*moveDict[Moves.SPOCK]
+	lizardUtility   = -1*moveDict[Moves.ROCK]+1*moveDict[Moves.PAPER]-1*moveDict[Moves.SCISSORS]+.1*moveDict[Moves.LIZARD]+1*moveDict[Moves.SPOCK]
+	spockUtility    = 1.0*moveDict[Moves.ROCK]-1*moveDict[Moves.PAPER]+1*moveDict[Moves.SCISSORS]-1*moveDict[Moves.LIZARD]+.1*moveDict[Moves.SPOCK]
 
 	if rockUtility is max(rockUtility,paperUtility,scissorsUtility,lizardUtility,spockUtility):
 		return Moves.ROCK
@@ -266,6 +260,10 @@ class Player5(Player):
         return
     
 class Player6(Player):
+    def __init__(self):
+        combine = {Moves.combinations[i] : str(i) for i in range(0, len(Moves.combinations))}
+        split = {str(i) : Moves.combinations[i] for i in range(0, len(Moves.combinations))}
+
     def getPlayerName(self):
         return "Pattern Detection"
 

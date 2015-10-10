@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
             numGames += 1
 
-    scoreSum = sum(outcome for outcome in result)
+    scoreSum = sum([outcome for outcome in scoreHistory])
 
     print "========================================"
 
