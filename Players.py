@@ -11,15 +11,22 @@
 #7: Bayes pattern detection: weights multiple patterns found and computes the best move
 #8: category player: determines what category of person you are, and uses algorithms 1-7 to beat you
 
-import random
-from collections import defaultdict
+import random, operator, itertools
 
 class Moves:
-    SCISSORS = "Scissors"
-    ROCK = "Rock"
-    PAPER = "Paper"
-    LIZARD = "Lizard"
-    SPOCK = "Spock"
+    CISSORS = "S"
+    ROCK = "R"
+    PAPER = "P"
+    LIZARD = "L"
+    SPOCK = "W"
+
+    possibleMoves = ['R', 'P', 'S', 'L', 'S']
+
+    combinations = [''.join(i) for i in itertools.product(possibleMoves, repeat = 3)]
+
+    combine = {combinations[i] : str(i) for i in range(0, len(combinations))}
+
+    split = {str(i) : combinations[i] for i in range(0, len(combinations))}
 
     @staticmethod
     def getAllMoves():
@@ -140,140 +147,117 @@ class Player:
     def getPlayerName(self):
         return "General Player"
         
-#not used in all players, consider moving
-    def getLeastUsedMoves(self, history):
-        moveCountDict = dict()
+    # Picks a sample from the population with
+    def weighted_choice(self, moves):
+        total = sum(weight for move, weight in moves.iteritems())
+        r = random.uniform(0, total)
+        upto = 0
 
-        for move in Moves.getAllMoves():
-            moveCountDict[move] = 0
+        for move, weight in population.iteritems():
+            if upto + weight >= r:
+                return move
 
-        for move in history:
-            moveCountDict[move] += 1
+            upto += weight
 
-        leastUsedMoves = []
-        smallestCount = 1000000
-        for key, value in moveCountDict.iteritems():
-            if smallestCount > value:
-                smallestCount = value
-                leastUsedMoves.append(key)
-            elif smallestCount == value:
-                leastUsedMoves.append(key)
-
-        return  leastUsedMoves
-
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return "Rock"
 
 class Player0(Player):
     def getPlayerName(self):
         return "Constant Player"
         
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return Moves.SPOCK
 
 class Player1(Player):
     def getPlayerName(self):
         return "Random Player"
 
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return Moves.getRandomMove()
 
 class Player2(Player):
     def getPlayerName(self):
         return "Weighted Random"
 
-    def getNextMove(self, history):
-	rockScore    = 0
-	paperScore   = 0
-	scissorsScore = 0
-	lizardScore  = 0
-	spockScore   = 0
-        for move_human_opponent_outcome in history:
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    	moveDict = {}
+    	for move in Move.getAllMoves():
+    		moveDict[move] = 0
+    	
+        for move_human_opponent_outcome in myHistory:
 		move = move_human_opponent_outcome[0]
 		if move == Moves.ROCK:
-			rockScore+=.5
-			paperScore+=1
-			spockScore+=1
+			moveDict[Moves.ROCK]+=.5
+			moveDict[Moves.PAPER]+=1
+			moveDict[Moves.SPOCK]+=1
 		elif move == Moves.PAPER:
-			paperScore+=.5
-			scissorsScore+=1
-			lizardScore+=1
+			moveDict[Moves.PAPER]+=.5
+			moveDict[Moves.SCISSORS]+=1
+			moveDict[Moves.LIZARD]+=1
 		elif move == Moves.SCISSORS:
-			scissorsScore+=.5
-			rockScore+=1
-			spockScore+=1
+			moveDict[Moves.SCISSORS]+=.5
+			moveDict[Moves.ROCK]+=1
+			moveDict[Moves.SPOCK]+=1
 		elif move == Moves.LIZARD:
-			lizardScore+=.5
-			scissorsScore+=1
-			rockScore+=1
+			moveDict[Moves.LIZARD]+=.5
+			moveDict[Moves.SCISSORS]+=1
+			moveDict[Moves.ROCK]+=1
 		elif move == Moves.SPOCK:
-			spockScore+=.5
-			paperScore+=1
-			lizardScore+=1
-	nextMove = random.uniform(0,rockScore+paperScore+scissorsScore+lizardScore+spockScore)
-	if nextMove <= rockScore:
-		return Moves.ROCK
-	nextMove-=rockScore
-	if nextMove <= paperScore:
-		return Moves.PAPER
-	nextMove-=paperScore
-	if nextMove <= scissorsScore:
-		return Moves.SCISSORS
-	nextMove-=scissorsScore
-	if nextMove <= lizardScore:
-		return Moves.LIZARD
-	nextMove-=lizardScore
-	if nextMove <= spockScore:
-		return Moves.SPOCK
-	else:
-		print "ERROR"
-		return
+			moveDict[Moves.SPOCK]+=.5
+			moveDict[Moves.PAPER]+=1
+			moveDict[Moves.LIZARD]+=1
+	
+	return self.weighted_choice(moveDict)
 
 class Player3(Player):
     def getPlayerName(self):
         return "MLE/MAP"
 
-    def getNextMove(self, history):
-        rockScore    = 0
-	paperScore   = 0
-	scissorsScore = 0
-	lizardScore  = 0
-	spockScore   = 0
-        for move_human_opponent_outcome in history:
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    	moveDict = {}
+    	
+        for move in Move.getAllMoves():
+    		moveDict[move] = 0
+    		
+        for move_human_opponent_outcome in theirHistory:
 		move = move_human_opponent_outcome[0]
 		if move == Moves.ROCK:
-			rockScore+=1
+			moveDict[Moves.ROCK]+=1
 		elif move == Moves.PAPER:
-			paperScore+=1
+			moveDict[Moves.PAPER]+=1
 		elif move == Moves.SCISSORS:
-			scissorsScore+=1
+			moveDict[Moves.SCISSORS]+=1
 		elif move == Moves.LIZARD:
-			lizardScore+=1
+			moveDict[Moves.LIZARD]+=1
 		elif move == Moves.SPOCK:
-			spockScore+=1
+			moveDict[Moves.SPOCK]+=1
 
-	if rockScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
-		return Moves.PAPER
-	elif paperScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
-		return Moves.SCISSORS
-	elif scissorsScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
-		return Moves.SPOCK
-	elif lizardScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
-		return Moves.ROCK
-	elif spockScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
-		return Moves.LIZARD
+	maxScoreMove = max(moveDict.iteritems(), key=operator.itemgetter(1))[0]
+	return random.choice(Move.getMovesThatCounter(maxScoreMove))
+
+	# if rockScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
+	# 	return Moves.PAPER
+	# elif paperScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
+	# 	return Moves.SCISSORS
+	# elif scissorsScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
+	# 	return Moves.SPOCK
+	# elif lizardScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
+	# 	return Moves.ROCK
+	# elif spockScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
+	# 	return Moves.LIZARD
 
 class Player4(Player):
     def getPlayerName(self):
         return "Bayes Average"
 
-    def getNextMove(self, history):
-        rockScore    = 0
-	paperScore   = 0
-	scissorsScore = 0
-	lizardScore  = 0
-	spockScore   = 0
-        for move_human_opponent_outcome in history:
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+        moveDict = {}
+    	
+        for move in Move.getAllMoves():
+    		moveDict[move] = 0
+    	
+        for move_human_opponent_outcome in theirHistory:
 		move = move_human_opponent_outcome[0]
 		if move == Moves.ROCK:
 			rockScore+=1
@@ -307,26 +291,59 @@ class Player5(Player):
     def getPlayerName(self):
         return "N Rotation w/l"
 
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return
     
 class Player6(Player):
     def getPlayerName(self):
         return "Pattern Detection"
 
-    def getNextMove(self, history):
-        return
+    def convertHistoriesIntoDna(self, myHistory, theirHistory):
+        dna = ""
+
+        if myHistory == "":
+            return dna
+
+        for i in range(0, len(myHistory)):
+            dna += Moves.combine[myHistory[i]+theirHistory[i]]
+
+        return dna
+
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+        dna = self.convertHistoriesIntoDna(myHistory, theirHistory)
+
+        if dna == "":
+            return Moves.getRandomMove()
+
+        result = None
+
+        for patternLength in range(min(5, len(dna)-1), 0, -1):
+            pattern = dna[-patternLength:]
+            patternIndex = dna.find(pattern, 0, -1)
+
+            if patternIndex != -1:
+                nextMoveAfterPattern = dna[patternIndex + patternLength]
+                expectedOpponentMove = Moves.split[nextMoveAfterPattern][1]
+                result = Moves.getMovesThatCounter(expectedOpponentMove)
+                break
+
+        if result is not None:
+            result = random.choice(result)
+        else:
+            result = Moves.getRandomMove()
+
+        return result
     
-class Player7(Player):
+class Player7(Player6):
     def getPlayerName(self):
         return "Bayes Pattern Detection"
 
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return
     
 class Player8(Player):
     def getPlayerName(self):
         return "Best Category"
 
-    def getNextMove(self, history):
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
         return
