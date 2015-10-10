@@ -11,8 +11,7 @@
 #7: Bayes pattern detection: weights multiple patterns found and computes the best move
 #8: category player: determines what category of person you are, and uses algorithms 1-7 to beat you
 
-import random
-from collections import defaultdict
+import random, operator
 
 class Moves:
     SCISSORS = "Scissors"
@@ -202,59 +201,43 @@ class Player2(Player):
 			moveDict[Moves.LIZARD]+=1
 	
 	return self.weighted_choice(moveDict)
-	
-	# nextMove = random.uniform(0,rockScore+paperScore+scissorsScore+lizardScore+spockScore)
-	# if nextMove <= rockScore:
-	# 	return Moves.ROCK
-	# nextMove-=rockScore
-	# if nextMove <= paperScore:
-	# 	return Moves.PAPER
-	# nextMove-=paperScore
-	# if nextMove <= scissorsScore:
-	# 	return Moves.SCISSORS
-	# nextMove-=scissorsScore
-	# if nextMove <= lizardScore:
-	# 	return Moves.LIZARD
-	# nextMove-=lizardScore
-	# if nextMove <= spockScore:
-	# 	return Moves.SPOCK
-	# else:
-	# 	print "ERROR"
-	# 	return
 
 class Player3(Player):
     def getPlayerName(self):
         return "MLE/MAP"
 
-    def getNextMove(self, history):
-        rockScore    = 0
-	paperScore   = 0
-	scissorsScore = 0
-	lizardScore  = 0
-	spockScore   = 0
-        for move_human_opponent_outcome in history:
+    def getNextMove(self, myHistory, theirHistory, scoreHistory):
+    	moveDict = {}
+    	
+        for move in Move.getAllMoves():
+    		moveDict[move] = 0
+    		
+        for move_human_opponent_outcome in theirHistory:
 		move = move_human_opponent_outcome[0]
 		if move == Moves.ROCK:
-			rockScore+=1
+			moveDict[Moves.ROCK]+=1
 		elif move == Moves.PAPER:
-			paperScore+=1
+			moveDict[Moves.PAPER]+=1
 		elif move == Moves.SCISSORS:
-			scissorsScore+=1
+			moveDict[Moves.SCISSORS]+=1
 		elif move == Moves.LIZARD:
-			lizardScore+=1
+			moveDict[Moves.LIZARD]+=1
 		elif move == Moves.SPOCK:
-			spockScore+=1
+			moveDict[Moves.SPOCK]+=1
 
-	if rockScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
-		return Moves.PAPER
-	elif paperScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
-		return Moves.SCISSORS
-	elif scissorsScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
-		return Moves.SPOCK
-	elif lizardScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
-		return Moves.ROCK
-	elif spockScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
-		return Moves.LIZARD
+	maxScoreMove = max(moveDict.iteritems(), key=operator.itemgetter(1))[0]
+	return random.choice(Move.getMovesThatCounter(maxScoreMove))
+
+	# if rockScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
+	# 	return Moves.PAPER
+	# elif paperScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
+	# 	return Moves.SCISSORS
+	# elif scissorsScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
+	# 	return Moves.SPOCK
+	# elif lizardScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
+	# 	return Moves.ROCK
+	# elif spockScore is max(rockScore,paperScore,scissorsScore,lizardScore,spockScore):
+	# 	return Moves.LIZARD
 
 class Player5(Player):
     def getPlayerName(self):
