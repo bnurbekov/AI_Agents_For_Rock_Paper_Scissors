@@ -33,13 +33,13 @@ if __name__ == "__main__":
     numGames = 0
     while numGames < maxNumGames:
         AIMove = player.getNextMove(player1History, player2History, scoreHistory)
-        player1History.append(AIMove)
+        player1History += AIMove
         try:
             move = Moves.parseMove(raw_input("\nEnter your move for trial %d:  " % numGames))
         except:
             print "Sorry, I didn't quite catch that. Please enter Rock | Paper | Scissors | Lizard | Spock."
         else:
-            player2History.append(move)
+            player2History += move
             print "You tried " + move + " and I tried " + AIMove
             result = Moves.compare(move, AIMove)
 
