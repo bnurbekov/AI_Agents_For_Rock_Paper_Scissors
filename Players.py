@@ -20,7 +20,7 @@ class Moves:
     LIZARD = "L"
     SPOCK = "W"
 
-    combinations = [''.join(i) for i in itertools.product(['R', 'P', 'S', 'L', 'S'], repeat = 3)]
+    combinations = [''.join(i) for i in itertools.product(['R', 'P', 'S', 'L', 'W'], repeat = 2)]
 
     @staticmethod
     def getAllMoves():
@@ -157,7 +157,7 @@ class Player:
     def getPlayerName(self):
         return "General Player"
 
-    def calculateScoresForMoves(self, myHistory, scoreHistory, maximization):
+    def calculateScoresForMovesWithLosesSubtracted(self, myHistory, scoreHistory, maximization):
         moveDict = {}
         for move in Moves.getAllMoves():
             #initialize as one to scale the weights properly
@@ -175,13 +175,27 @@ class Player:
 
         return moveDict
 
-    # Picks a move from moves considering weight
-    def weighted_choice(self, moves):
-        total = sum(weight for move, weight in moves.iteritems())
+    def calculateScoresForMoves(self, myHistory, scoreHistory, maximization):
+        moveDict = {}
+        for move in Moves.getAllMoves():
+            #initialize as one to scale the weights properly
+            moveDict[move] = 0
+
+        for i in range(len(scoreHistory)):
+            if scoreHistory[i] == maximization:
+                moveDict[myHistory[i]] += 1
+            elif scoreHistory[i] == 0:
+                moveDict[myHistory[i]] += 0.5
+
+        return moveDict
+
+    # Random weighted choice from dict
+    def weighted_choice(self, itemDict):
+        total = sum(weight for move, weight in itemDict.iteritems())
         r = random.uniform(0, total)
         upto = 0
 
-        keyValuePairs = list(moves.iteritems())
+        keyValuePairs = list(itemDict.iteritems())
         random.shuffle(keyValuePairs)
 
         for move, weight in keyValuePairs:
@@ -210,16 +224,20 @@ class Player1(Player):
         return Moves.getRandomMove()
 
 class Player2(Player):
+    """More likely to pick successful in the past moves."""
+
     def getPlayerName(self):
         return "Weighted Random"
 
     def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
-        moveDict = self.calculateScoresForMoves(myHistory, scoreHistory, maximization)
+        moveDict = self.calculateScoresForMovesWithLosesSubtracted(myHistory, scoreHistory, maximization)
         return self.weighted_choice(moveDict)
 
 class Player3(Player):
+    """Counters Player2."""
+
     def __init__(self):
-        self.opponentPlayer = Player1()
+        self.opponentPlayer = Player2()
 
     def getPlayerName(self):
         return "MLE/MAP"
@@ -242,14 +260,18 @@ class Player4(Player):
             for m in moveDict:
                 if (move == m):
                     moveUtilityDict[move] += 0.1*moveDict[m]
-                elif (move in Moves.getMovesThatCounter(m)):
+                elif (move not in Moves.getMovesThatCounter(m)):
                     moveUtilityDict[move] -= moveDict[m]
                 else:
                     moveUtilityDict[move] += moveDict[m]
 
-        opponentMove = max(moveUtilityDict.iteritems(), key=operator.itemgetter(1))[0]
+        minScore = min(moveUtilityDict.itervalues())
 
-        return random.choice(Moves.getMoveThatCounters(opponentMove))
+        if minScore < 0:
+            for move in moveUtilityDict.iterkeys():
+                moveUtilityDict[move] += -minScore
+
+        return self.weighted_choice(moveUtilityDict)
 
 class Player5(Player):
     def getPlayerName(self):
@@ -260,8 +282,8 @@ class Player5(Player):
     
 class Player6(Player):
     def __init__(self):
-        combine = {Moves.combinations[i] : str(i) for i in range(0, len(Moves.combinations))}
-        split = {str(i) : Moves.combinations[i] for i in range(0, len(Moves.combinations))}
+        self.combine = {Moves.combinations[i] : chr(ord('a') + i) for i in range(0, len(Moves.combinations))}
+        self.split = {chr(ord('a') + i) : Moves.combinations[i] for i in range(0, len(Moves.combinations))}
 
     def getPlayerName(self):
         return "Pattern Detection"
@@ -273,7 +295,7 @@ class Player6(Player):
             return dna
 
         for i in range(0, len(myHistory)):
-            dna += Moves.combine[myHistory[i]+theirHistory[i]]
+            dna += self.combine[myHistory[i]+theirHistory[i]]
 
         return dna
 
@@ -283,24 +305,46 @@ class Player6(Player):
         if dna == "":
             return Moves.getRandomMove()
 
-        result = None
+        patternDict = {}
 
         for patternLength in range(min(5, len(dna)-1), 0, -1):
             pattern = dna[-patternLength:]
-            patternIndex = dna.find(pattern, 0, -1)
+            searchStart = 0
 
-            if patternIndex != -1:
+            while True:
+                patternIndex = dna.find(pattern, searchStart, -1)
+
+                if patternIndex == -1:
+                    break
+
+                searchStart = patternIndex + 1
+
                 nextMoveAfterPattern = dna[patternIndex + patternLength]
-                expectedOpponentMove = Moves.split[nextMoveAfterPattern][1]
-                result = Moves.getMovesThatCounter(expectedOpponentMove)
-                break
+                expectedOpponentMove = self.split[nextMoveAfterPattern][1]
+                if pattern in patternDict.iterkeys():
+                    patternDict[pattern].append(expectedOpponentMove)
+                else:
+                    patternDict[pattern] = [expectedOpponentMove]
 
-        if result is not None:
-            result = random.choice(result)
+        if len(patternDict)>1:
+            patternUtilDict = {}
+
+            #weighted choice of a pattern based on length and frequency
+            for pattern, listOfNextMoves in patternDict.iteritems():
+                patternUtilDict[pattern] = len(listOfNextMoves)/4.0 + len(pattern)/4.0*3
+
+            selectedPattern = self.weighted_choice(patternUtilDict)
+        elif patternDict:
+            selectedPattern = patternDict.keys()[0]
         else:
-            result = Moves.getRandomMove()
+            return Moves.getRandomMove()
 
-        return result
+        #weighted choice of next move of an opponent
+        opponentMoves = patternDict[selectedPattern]
+        nextOpponentMove = self.weighted_choice(dict( [(i, opponentMoves.count(i)) for i in set(opponentMoves)]))
+
+        #weighted choice of move that would counter the next move of an opponent
+        return random.choice(Moves.getMovesThatCounter(nextOpponentMove))
     
 class Player7(Player6):
     def getPlayerName(self):
