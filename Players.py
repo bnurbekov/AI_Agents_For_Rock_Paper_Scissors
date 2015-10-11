@@ -131,7 +131,7 @@ class Moves:
 
 class PlayerFactory:
     @staticmethod
-    def initPlayer(playerNum):
+    def initPlayer(playerNum, logFile):
         if (playerNum == 0):
             return Player0()
         elif (playerNum == 1):
@@ -147,9 +147,7 @@ class PlayerFactory:
         elif (playerNum == 6):
             return Player6()
         elif (playerNum == 7):
-            return Player7()
-        elif (playerNum == 8):
-            return Player8()
+            return Player7(logFile)
         else:
             return None
 
@@ -275,10 +273,17 @@ class Player4(Player):
 
 class Player5(Player):
     def getPlayerName(self):
-        return "N Rotation w/l"
+        return "Rotation"
 
     def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
-        return
+        """Tries to counter the rotation after opponent's loss."""
+
+        #If it's the first move or the opponent has won previously, then select random move
+        if (len(myHistory) <= 0 or scoreHistory[-1] != maximization):
+            return Moves.getRandomMove()
+
+        return random.choice(Moves.getMovesThatCounter(random.choice(Moves.getMovesThatCounter(myHistory[-1]))))
+
     
 class Player6(Player):
     def __init__(self):
@@ -346,16 +351,35 @@ class Player6(Player):
         #weighted choice of move that would counter the next move of an opponent
         return random.choice(Moves.getMovesThatCounter(nextOpponentMove))
     
-class Player7(Player6):
-    def getPlayerName(self):
-        return "Bayes Pattern Detection"
+class Player7(Player):
+    def __init__(self, logFile):
+        self.logFile = logFile
+        self.strategyScores = []
+        self.strategies = []
+        for i in range(0, 7):
+            self.strategies.append(PlayerFactory.initPlayer(i, logFile))
+            self.strategyScores.append(0)
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
-        return
-    
-class Player8(Player):
     def getPlayerName(self):
         return "Best Category"
 
     def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
-        return
+        """Implements Random Drop Switch strategy for player selection."""
+
+        if len(scoreHistory) > 0:
+             if scoreHistory[-1] == maximization:
+                 self.strategyScores[self.lastStrategyIndex] += 1
+             elif scoreHistory[-1] == -maximization:
+                 if random.randint(0, 1):
+                     self.strategyScores[self.lastStrategyIndex] = 0
+
+        self.logFile.write("Strategy scores:\n" + '\n'.join([str(i)+" " + str(self.strategyScores[i]) for i in range(len(self.strategyScores))]) + "\n")
+
+        #find the position of the maximum element in array
+        maxScore = max(enumerate(self.strategyScores), key=(lambda x: x[1]))[1]
+        maxScoringStrategies = [i for i in range(len(self.strategyScores)) if self.strategyScores[i] == maxScore]
+        self.lastStrategyIndex = random.choice(maxScoringStrategies)
+
+        self.logFile.write("Strategy selected: " + str(self.lastStrategyIndex) + "\n")
+
+        return self.strategies[self.lastStrategyIndex].getNextMove(myHistory, theirHistory, scoreHistory, maximization)
