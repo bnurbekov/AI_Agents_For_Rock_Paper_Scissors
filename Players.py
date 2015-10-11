@@ -155,6 +155,9 @@ class Player:
     def getPlayerName(self):
         return "General Player"
 
+    def printStats(self):
+        return
+
     def calculateScoresForMovesWithLosesSubtracted(self, myHistory, scoreHistory, maximization):
         moveDict = {}
         for move in Moves.getAllMoves():
@@ -354,11 +357,16 @@ class Player6(Player):
 class Player7(Player):
     def __init__(self, logFile):
         self.logFile = logFile
+        self.strategiesUsed = []
         self.strategyScores = []
         self.strategies = []
         for i in range(0, 7):
             self.strategies.append(PlayerFactory.initPlayer(i, logFile))
             self.strategyScores.append(0)
+            self.strategiesUsed.append(0)
+
+    def printStats(self):
+        self.logFile.write("Strategies used:\n" + '\n'.join([str(i)+" " + str(self.strategiesUsed[i]) for i in range(len(self.strategiesUsed))]) + "\n")
 
     def getPlayerName(self):
         return "Best Category"
@@ -379,6 +387,7 @@ class Player7(Player):
         maxScore = max(enumerate(self.strategyScores), key=(lambda x: x[1]))[1]
         maxScoringStrategies = [i for i in range(len(self.strategyScores)) if self.strategyScores[i] == maxScore]
         self.lastStrategyIndex = random.choice(maxScoringStrategies)
+        self.strategiesUsed[self.lastStrategyIndex] += 1
 
         self.logFile.write("Strategy selected: " + str(self.lastStrategyIndex) + "\n")
 

@@ -42,6 +42,7 @@ if __name__ == "__main__":
         except:
             print "Sorry, I didn't quite catch that. Please enter Rock | Paper | Scissors | Lizard | Spock."
         else:
+            print ""
             print "You tried (" + Moves.convertToFullName(move) + ") and I tried (" + Moves.convertToFullName(AIMove) + ")"
             result = Moves.compare(move, AIMove)
 
@@ -61,6 +62,16 @@ if __name__ == "__main__":
             numGames += 1
 
     scoreSum = sum([outcome for outcome in scoreHistory])
+    ties = sum([1 for outcome in scoreHistory if outcome == 0])
+    wins = sum([1 for outcome in scoreHistory if outcome == 1])
+    losses = sum([1 for outcome in scoreHistory if outcome == -1])
+
+    file.write("Ties: " + str(ties) + "\n")
+    file.write("Wins: " + str(wins) + "\n")
+    file.write("Losses: " + str(losses) + "\n")
+
+    file.write("=====================================\n")
+    player.printStats()
 
     print "========================================"
 
