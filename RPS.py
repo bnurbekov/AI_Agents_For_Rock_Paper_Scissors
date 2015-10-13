@@ -74,6 +74,10 @@ if __name__ == "__main__":
     player.printStats()
 
     print "========================================"
+    
+    print "W:%d\tL:%d\tT:%d"%(wins,losses,ties)
+    
+    print "========================================"
 
     if scoreSum >= 1:
         print "Overall you win!"
