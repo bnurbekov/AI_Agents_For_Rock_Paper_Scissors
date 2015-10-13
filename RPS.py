@@ -16,7 +16,6 @@ if __name__ == "__main__":
 
     humanName = raw_input("Please enter your name: ")
     file = open(humanName, 'w')
-    file.write("Player: " + humanName + "\n")
 
     print "Hello!\n" \
           "Welcome to our Rock-Paper-Scissor-Lizard-Spock Game!\n" \
@@ -27,6 +26,8 @@ if __name__ == "__main__":
           "Good luck!\n"
 
     player = PlayerFactory.initPlayer(int(sys.argv[1]), file)
+    file.write("Player: " + humanName + str(player) + "\n")
+    
     maxNumGames = int(sys.argv[2])
 
     print "You selected (" + player.getPlayerName() + ") player and number of moves (%d)" % maxNumGames
