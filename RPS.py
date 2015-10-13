@@ -15,7 +15,7 @@ if __name__ == "__main__":
     checkArgs()
 
     humanName = raw_input("Please enter your name: ")
-    file = open(humanName, 'w')
+    file = open(humanName + sys.argv[1], 'w')
 
     print "Hello!\n" \
           "Welcome to our Rock-Paper-Scissor-Lizard-Spock Game!\n" \
