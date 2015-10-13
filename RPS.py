@@ -26,7 +26,7 @@ if __name__ == "__main__":
           "Good luck!\n"
 
     player = PlayerFactory.initPlayer(int(sys.argv[1]), file)
-    file.write("Player: " + humanName + str(player) + "\n")
+    file.write("Player: " + humanName + sys.argv[1] + "\n")
     
     maxNumGames = int(sys.argv[2])
 
