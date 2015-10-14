@@ -454,9 +454,9 @@ class Player8(Player):
             #TODO: change to pass this parameter in the constructor
             self.qScoreFileName = 'qScores'
             self.getQScores(self.qScoreFileName)
-        except:
-            self.qScores = [[0] * 5] * 5
-            print self.getPlayerName() + ": QScore file does not exist. Initializing Weights as 0s."
+        except Exception, e:
+            self.qScores = [[0] * 5 for _ in range(5)]
+            print self.getPlayerName() + ": QScore file does not exist. Initializing Weights as 0s. Exception: " + str(e)
 
     def getQScores(self, qScoreFileName):
         """Gets Q scores from a file."""
@@ -478,7 +478,7 @@ class Player8(Player):
                 if len(chars) != 5:
                     raise Exception("The number of columns in qScores file should be at least 5.")
 
-                self.qScores.append([int(char) for char in chars])
+                self.qScores.append([float(char) for char in chars])
 
     def writeQScores(self, qScoresFileName):
         """Writes Q scores into file."""
