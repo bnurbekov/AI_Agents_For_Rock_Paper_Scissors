@@ -129,6 +129,7 @@ class Moves:
 
         return counterMoves
 
+
 class PlayerFactory:
     @staticmethod
     def initPlayer(playerNum, genericLog):
@@ -441,6 +442,14 @@ class Player8(Player):
         self.alpha = 0.1
         self.discount = 0.7
 
+        self.moveToQArrayInd = {}
+        i = 0
+        for move in Moves.getAllMoves():
+            self.moveToQArrayInd[move] = i
+            i += 1
+
+        self.qArrayIndToMove = {v:k for k, v in self.moveToQArrayInd.iteritems()}
+
         try:
             #TODO: change to pass this parameter in the constructor
             self.qScoreFileName = 'qScores'
@@ -484,9 +493,34 @@ class Player8(Player):
     def getPlayerName(self):
         return "Bonus Reinforcement Learning"
 
-    def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
-        
+    def getReward(self, result, maximization):
+        if result == maximization:
+            return 1
+        elif result == -maximization:
+            return -1000
+        else:
+            return 0
 
+    def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
+        if len(myHistory) <= 0:
+            return Moves.getRandomMove()
+
+        opponentPrevMove = theirHistory[-1]
+        myPrevMove = myHistory[-1]
+
+        state = self.moveToQArrayInd[opponentPrevMove]
+        action = self.moveToQArrayInd[myPrevMove]
+
+        oldQScore = self.qScores[state][action]
+        reward = self.getReward(scoreHistory[-1], maximization)
+
+        nextAction = max(enumerate(self.qScores[state]),key=lambda x: x[1])[0]
+
+        newQScore = oldQScore + self.alpha * (reward + self.discount * self.qScores[state][nextAction] - oldQScore)
+
+        self.qScores[state][action] = newQScore
+
+        return self.qArrayIndToMove[nextAction]
 
 class PlayerHuman(Player):
     """Reinforcement learning player"""
