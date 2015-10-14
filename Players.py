@@ -11,7 +11,7 @@
 #7: Bayes pattern detection: weights multiple patterns found and computes the best move
 #8: category player: determines what category of person you are, and uses algorithms 1-7 to beat you
 
-import random, operator, itertools
+import random, itertools, os, re
 
 class Moves:
     SCISSORS = "S"
@@ -437,16 +437,55 @@ class Player8(Player):
 
     def __init__(self, genericLog):
         Player.__init__(self, genericLog)
+        self.epsilon = 0.05
+        self.alpha = 0.1
+        self.discount = 0.7
+
+        try:
+            #TODO: change to pass this parameter in the constructor
+            self.qScoreFileName = 'qScores'
+            self.getQScores(self.qScoreFileName)
+        except:
+            self.qScores = [[0] * 5] * 5
+            print self.getPlayerName() + ": QScore file does not exist. Initializing Weights as 0s."
+
+    def getQScores(self, qScoreFileName):
+        """Gets Q scores from a file."""
+
+        if not os.path.exists(qScoreFileName):
+            raise Exception("QScore file is not defined.")
+
+        self.qScores = []
+
+        with open(qScoreFileName, 'r') as file:
+            lines = file.readlines()
+
+            if len(lines) != 5:
+                raise Exception("The number of rows in qScores file should be at least 5.")
+
+            for i in range(len(lines)):
+                chars = filter(None, re.split('\t|\s|\n|\v|\r', lines[i]))
+
+                if len(chars) != 5:
+                    raise Exception("The number of columns in qScores file should be at least 5.")
+
+                self.qScores.append([int(char) for char in chars])
+
+    def writeQScores(self, qScoresFileName):
+        """Writes Q scores into file."""
+
+        with open(qScoresFileName, 'w') as file:
+            file.writelines('\n'.join([' '.join([str(score) for score in row]) for row in self.qScores]))
 
     def printStats(self, myHistory, scoreHistory, maximization):
         Player.printStats(self, myHistory, scoreHistory, maximization)
-        return
+        self.writeQScores(self.qScoreFileName)
 
     def getPlayerName(self):
         return "Bonus Reinforcement Learning"
 
     def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
-        return
+        
 
 
 class PlayerHuman(Player):

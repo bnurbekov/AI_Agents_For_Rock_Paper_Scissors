@@ -39,6 +39,8 @@ if __name__ == "__main__":
 
     file = open('MainLog', 'w')
     player1 = PlayerFactory.initPlayer(args[0], file)
+    player1.writeQScores('qScores')
+    exit()
     player2 = PlayerFactory.initPlayer(args[1], file)
     maxNumGames = int(args[2])
 
