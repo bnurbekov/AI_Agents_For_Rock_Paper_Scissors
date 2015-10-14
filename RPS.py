@@ -50,7 +50,7 @@ if __name__ == "__main__":
     player1Maximization = -1
     player2Maximization = 1
 
-    while len(scoreHistory) <= maxNumGames:
+    while len(scoreHistory) < maxNumGames:
         move1 = player1.getNextMove(player1History, player2History, scoreHistory, player1Maximization)
         move2 = player2.getNextMove(player2History, player1History, scoreHistory, player2Maximization)
         result = Moves.compare(move2, move1)

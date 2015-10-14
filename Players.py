@@ -24,7 +24,7 @@ class Moves:
 
     @staticmethod
     def getAllMoves():
-        return [Moves.SCISSORS, Moves.ROCK, Moves.PAPER, Moves.LIZARD, Moves.SPOCK]
+        return [Moves.ROCK, Moves.PAPER, Moves.SCISSORS, Moves.LIZARD, Moves.SPOCK]
 
     @staticmethod
     def parseMove(inputString):
@@ -438,24 +438,21 @@ class Player8(Player):
 
     def __init__(self, genericLog):
         Player.__init__(self, genericLog)
-        self.epsilon = 0.05
-        self.alpha = 0.1
-        self.discount = 0.7
+        self.epsilon = 0.15
+        self.alpha = 0.6
+        self.discount = 0.9
 
-        self.moveToQArrayInd = {}
-        i = 0
-        for move in Moves.getAllMoves():
-            self.moveToQArrayInd[move] = i
-            i += 1
-
-        self.qArrayIndToMove = {v:k for k, v in self.moveToQArrayInd.iteritems()}
+        self.patternDetector = Player6(genericLog)
 
         try:
             #TODO: change to pass this parameter in the constructor
             self.qScoreFileName = 'qScores'
             self.getQScores(self.qScoreFileName)
         except Exception, e:
-            self.qScores = [[0] * 5 for _ in range(5)]
+            self.qScores = {s: 0 for s in Moves.getAllMoves()}
+            for state in self.qScores:
+                self.qScores[state] = {a: 0 for a in Moves.getAllMoves()}
+
             print self.getPlayerName() + ": QScore file does not exist. Initializing Weights as 0s. Exception: " + str(e)
 
     def getQScores(self, qScoreFileName):
@@ -464,7 +461,8 @@ class Player8(Player):
         if not os.path.exists(qScoreFileName):
             raise Exception("QScore file is not defined.")
 
-        self.qScores = []
+        possibleMoves = Moves.getAllMoves()
+        self.qScores = {s: 0 for s in Moves.getAllMoves()}
 
         with open(qScoreFileName, 'r') as file:
             lines = file.readlines()
@@ -478,13 +476,14 @@ class Player8(Player):
                 if len(chars) != 5:
                     raise Exception("The number of columns in qScores file should be at least 5.")
 
-                self.qScores.append([float(char) for char in chars])
+                self.qScores[possibleMoves[i]] = {possibleMoves[i]: float(chars[i]) for i in range(len(chars))}
 
     def writeQScores(self, qScoresFileName):
         """Writes Q scores into file."""
 
         with open(qScoresFileName, 'w') as file:
-            file.writelines('\n'.join([' '.join([str(score) for score in row]) for row in self.qScores]))
+            possibleMoves = Moves.getAllMoves()
+            file.writelines('\n'.join([' '.join([str(self.qScores[state][action]) for action in possibleMoves]) for state in possibleMoves]))
 
     def printStats(self, myHistory, scoreHistory, maximization):
         Player.printStats(self, myHistory, scoreHistory, maximization)
@@ -495,7 +494,7 @@ class Player8(Player):
 
     def getReward(self, result, maximization):
         if result == maximization:
-            return 1
+            return 2
         elif result == -maximization:
             return -1000
         else:
@@ -505,22 +504,34 @@ class Player8(Player):
         if len(myHistory) <= 0:
             return Moves.getRandomMove()
 
-        opponentPrevMove = theirHistory[-1]
-        myPrevMove = myHistory[-1]
+        lossesCount = 0
+        if len(scoreHistory) > 3:
+            for i in range(1, 3):
+                if scoreHistory[-i] == -maximization:
+                    lossesCount += 1
 
-        state = self.moveToQArrayInd[opponentPrevMove]
-        action = self.moveToQArrayInd[myPrevMove]
+        if lossesCount >= 2:
+            return self.patternDetector.getNextMove(myHistory, theirHistory, scoreHistory, maximization)
+
+        if random.uniform(0, 1) < self.epsilon:
+            return Moves.getRandomMove()
+
+        state = theirHistory[-1]
+        action = myHistory[-1]
 
         oldQScore = self.qScores[state][action]
         reward = self.getReward(scoreHistory[-1], maximization)
 
-        nextAction = max(enumerate(self.qScores[state]),key=lambda x: x[1])[0]
+        allNextQs = self.qScores[state]
+        maxScore = max(allNextQs.itervalues())
+        possibleActions = [a for a in allNextQs.iterkeys() if allNextQs[a] == maxScore]
+        nextAction = random.choice(possibleActions)
 
         newQScore = oldQScore + self.alpha * (reward + self.discount * self.qScores[state][nextAction] - oldQScore)
 
         self.qScores[state][action] = newQScore
 
-        return self.qArrayIndToMove[nextAction]
+        return nextAction
 
 class PlayerHuman(Player):
     """Reinforcement learning player"""
@@ -534,9 +545,9 @@ class PlayerHuman(Player):
         scoreSum = sum([outcome for outcome in scoreHistory])
 
         if scoreSum >= 1:
-            print "Overall you win!"
+            print "Overall you win!" if maximization == 1 else "Overall you lose!"
         elif scoreSum <= -1:
-            print "Overall you lose!"
+            print "Overall you lose!" if maximization == 1 else "Overall you win!"
         else:
             print "Overall you tie!"
 
