@@ -131,32 +131,51 @@ class Moves:
 
 class PlayerFactory:
     @staticmethod
-    def initPlayer(playerNum, logFile):
-        if (playerNum == 0):
-            return Player0()
-        elif (playerNum == 1):
-            return Player1()
-        elif (playerNum == 2):
-            return Player2()
-        elif (playerNum == 3):
-            return Player3()
-        elif (playerNum == 4):
-            return Player4()
-        elif (playerNum == 5):
-            return Player5()
-        elif (playerNum == 6):
-            return Player6()
-        elif (playerNum == 7):
-            return Player7(logFile)
+    def initPlayer(playerNum, genericLog):
+        if (playerNum == '0'):
+            return Player0(genericLog)
+        elif (playerNum == '1'):
+            return Player1(genericLog)
+        elif (playerNum == '2'):
+            return Player2(genericLog)
+        elif (playerNum == '3'):
+            return Player3(genericLog)
+        elif (playerNum == '4'):
+            return Player4(genericLog)
+        elif (playerNum == '5'):
+            return Player5(genericLog)
+        elif (playerNum == '6'):
+            return Player6(genericLog)
+        elif (playerNum == '7'):
+            return Player7(genericLog)
+        elif (playerNum == '8'):
+            return Player8(genericLog)
+        elif (playerNum == 'h'):
+            return PlayerHuman(genericLog)
         else:
             return None
 
 class Player:
+    def __init__(self, genericLog):
+        self.genericLog = genericLog
+        self.ownLog = open(self.getPlayerName(), 'w')
+        self.ownLog.write("Player: " + self.getPlayerName() + "\n")
+
+    def processResult(self, myHistory, theirHistory, scoreHistory, maximization):
+        return
+
     def getPlayerName(self):
         return "General Player"
 
-    def printStats(self):
-        return
+    def printStats(self, myHistory, scoreHistory, maximization):
+        ties = sum([1 for outcome in scoreHistory if outcome == 0])
+        wins = sum([1 for outcome in scoreHistory if outcome == maximization])
+        losses = sum([1 for outcome in scoreHistory if outcome == -maximization])
+
+        self.ownLog.write("Ties: " + str(ties) + "\n")
+        self.ownLog.write("Wins: " + str(wins) + "\n")
+        self.ownLog.write("Losses: " + str(losses) + "\n")
+
 
     def calculateScoresForMovesWithLosesSubtracted(self, myHistory, scoreHistory, maximization):
         moveDict = {}
@@ -211,6 +230,9 @@ class Player:
         return "Rock"
 
 class Player0(Player):
+    def __init__(self, genericLog):
+        Player.__init__(self, genericLog)
+
     def getPlayerName(self):
         return "Constant Player"
         
@@ -218,6 +240,9 @@ class Player0(Player):
         return Moves.SPOCK
 
 class Player1(Player):
+    def __init__(self, genericLog):
+        Player.__init__(self, genericLog)
+
     def getPlayerName(self):
         return "Random Player"
 
@@ -226,6 +251,9 @@ class Player1(Player):
 
 class Player2(Player):
     """More likely to pick successful in the past moves."""
+
+    def __init__(self, genericLog):
+        Player.__init__(self, genericLog)
 
     def getPlayerName(self):
         return "Weighted Random"
@@ -237,16 +265,20 @@ class Player2(Player):
 class Player3(Player):
     """Counters Player2."""
 
-    def __init__(self):
-        self.opponentPlayer = Player2()
+    def __init__(self, genericLog):
+        Player.__init__(self, genericLog)
+        self.opponentPlayer = Player2(genericLog)
 
     def getPlayerName(self):
-        return "MLE/MAP"
+        return "MLE_MAP"
 
     def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
         return random.choice(Moves.getMovesThatCounter(self.opponentPlayer.getNextMove(theirHistory, myHistory, scoreHistory, -maximization)))
 
 class Player4(Player):
+    def __init__(self, genericLog):
+        Player.__init__(self, genericLog)
+
     def getPlayerName(self):
         return "Bayes Average"
 
@@ -275,6 +307,9 @@ class Player4(Player):
         return self.weighted_choice(moveUtilityDict)
 
 class Player5(Player):
+    def __init__(self, genericLog):
+        Player.__init__(self, genericLog)
+
     def getPlayerName(self):
         return "Rotation"
 
@@ -289,7 +324,9 @@ class Player5(Player):
 
     
 class Player6(Player):
-    def __init__(self):
+    def __init__(self, genericLog):
+        Player.__init__(self, genericLog)
+
         self.combine = {Moves.combinations[i] : chr(ord('a') + i) for i in range(0, len(Moves.combinations))}
         self.split = {chr(ord('a') + i) : Moves.combinations[i] for i in range(0, len(Moves.combinations))}
 
@@ -355,18 +392,20 @@ class Player6(Player):
         return random.choice(Moves.getMovesThatCounter(nextOpponentMove))
     
 class Player7(Player):
-    def __init__(self, logFile):
-        self.logFile = logFile
+    def __init__(self, genericLog):
+        Player.__init__(self, genericLog)
+
         self.strategiesUsed = []
         self.strategyScores = []
         self.strategies = []
         for i in range(0, 7):
-            self.strategies.append(PlayerFactory.initPlayer(i, logFile))
+            self.strategies.append(PlayerFactory.initPlayer(str(i), genericLog))
             self.strategyScores.append(0)
             self.strategiesUsed.append(0)
 
-    def printStats(self):
-        self.logFile.write("Strategies used:\n" + '\n'.join([str(i)+" " + str(self.strategiesUsed[i]) for i in range(len(self.strategiesUsed))]) + "\n")
+    def printStats(self, myHistory, scoreHistory, maximization):
+        Player.printStats(self, myHistory, scoreHistory, maximization)
+        self.ownLog.write("Strategies used:\n" + '\n'.join([str(i)+" " + str(self.strategiesUsed[i]) for i in range(len(self.strategiesUsed))]) + "\n")
 
     def getPlayerName(self):
         return "Best Category"
@@ -381,7 +420,7 @@ class Player7(Player):
                  if random.randint(0, 1):
                      self.strategyScores[self.lastStrategyIndex] = 0
 
-        self.logFile.write("Strategy scores:\n" + '\n'.join([str(i)+" " + str(self.strategyScores[i]) for i in range(len(self.strategyScores))]) + "\n")
+        self.ownLog.write("Strategy scores:\n" + '\n'.join([str(i)+" " + str(self.strategyScores[i]) for i in range(len(self.strategyScores))]) + "\n")
 
         #find the position of the maximum element in array
         maxScore = max(enumerate(self.strategyScores), key=(lambda x: x[1]))[1]
@@ -389,6 +428,70 @@ class Player7(Player):
         self.lastStrategyIndex = random.choice(maxScoringStrategies)
         self.strategiesUsed[self.lastStrategyIndex] += 1
 
-        self.logFile.write("Strategy selected: " + str(self.lastStrategyIndex) + "\n")
+        self.ownLog.write("Strategy selected: " + str(self.lastStrategyIndex) + "\n")
 
         return self.strategies[self.lastStrategyIndex].getNextMove(myHistory, theirHistory, scoreHistory, maximization)
+
+class Player8(Player):
+    """Reinforcement learning player"""
+
+    def __init__(self, genericLog):
+        Player.__init__(self, genericLog)
+
+    def printStats(self, myHistory, scoreHistory, maximization):
+        Player.printStats(self, myHistory, scoreHistory, maximization)
+        return
+
+    def getPlayerName(self):
+        return "Bonus Reinforcement Learning"
+
+    def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
+        return
+
+
+class PlayerHuman(Player):
+    """Reinforcement learning player"""
+
+    def __init__(self, genericLog):
+        Player.__init__(self, genericLog)
+
+    def printStats(self, myHistory, scoreHistory, maximization):
+        Player.printStats(self, myHistory, scoreHistory, maximization)
+
+        scoreSum = sum([outcome for outcome in scoreHistory])
+
+        if scoreSum >= 1:
+            print "Overall you win!"
+        elif scoreSum <= -1:
+            print "Overall you lose!"
+        else:
+            print "Overall you tie!"
+
+    def getPlayerName(self):
+        return "Human"
+
+    def getNextMove(self, myHistory, theirHistory, scoreHistory, maximization):
+        playerMadeValidMove = False
+        move = None
+
+        while not playerMadeValidMove:
+            try:
+                userInput = raw_input("\nEnter your move for trial %d:  " % (len(myHistory) + 1))
+                move = Moves.parseMove(userInput)
+            except Exception, e:
+                print "Sorry, I didn't quite catch that. Please enter Rock | Paper | Scissors | Lizard | Spock. Error: " + str(e)
+            else:
+                playerMadeValidMove = True
+
+        return move
+
+    def processResult(self, myHistory, theirHistory, scoreHistory, maximization):
+        print "You tried (" + Moves.convertToFullName(myHistory[-1]) + ") and I tried (" + Moves.convertToFullName(theirHistory[-1]) + ")"
+
+        if scoreHistory[-1] is maximization:
+            print "You win!"
+        elif scoreHistory[-1] is 0:
+            print "You tie!"
+        else:
+            print "You lose!"
+        
