@@ -7,8 +7,11 @@ The main script that executes game logic.
 ###Player.py
 Contains implementation for different players.
 
-## Running the code (note that options should necessarily be provided):
+## Running the code
+```
 ./RPS.py --player1 playerNumber|h --player2 playerNumber|h --numberOfGames number
+```
+*Note: options should be necessarily provided 
  
 ## Option description
 ### player1
